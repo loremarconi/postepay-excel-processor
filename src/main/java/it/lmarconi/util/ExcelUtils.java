@@ -1,12 +1,11 @@
 package it.lmarconi.util;
 
 import it.lmarconi.model.CardTransaction;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,9 +15,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class ExcelUtils {
-
-    private static final Logger log = LoggerFactory.getLogger(ExcelUtils.class);
 
     private ExcelUtils() {
         //Empty private constructor
