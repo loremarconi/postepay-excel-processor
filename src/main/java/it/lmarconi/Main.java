@@ -1,6 +1,8 @@
 package it.lmarconi;
 
 import it.lmarconi.model.CardTransaction;
+import it.lmarconi.model.CardTransactionMonthlySum;
+import it.lmarconi.service.CardTransactionService;
 import it.lmarconi.util.ExcelUtils;
 
 import java.text.MessageFormat;
@@ -8,12 +10,12 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        List<CardTransaction> transactions = ExcelUtils.extractTransactionsFromExcel("C:/Users/Lorenzo/Documents/test-codice/ListaMovimenti.xlsx");
-        //Printing excel results for initial tests about field formatting
-        for (CardTransaction transaction : transactions) {
-            System.out.println(MessageFormat.format("Transaction Date: {0}, Amount: {1}, Description: {2}",
-                    transaction.getTransactionDate(), transaction.getAmount(), transaction.getDescription()));
+        List<CardTransaction> transactions = ExcelUtils.extractTransactionsFromExcel("INSERT INPUT PATH HERE");
+        CardTransactionService service = new CardTransactionService();
+        List<CardTransactionMonthlySum> cardTransactionMonthlySumList = service.getMonthlyNetRemaining(transactions);
+        for (CardTransactionMonthlySum monthlySum : cardTransactionMonthlySumList) {
+            System.out.println(MessageFormat.format("Month: {0}, Net income: {1}", monthlySum.getMonth(), monthlySum.getMonthlyNetIncome()));
         }
-        System.out.println("Transactions: " + transactions.size());
+        ExcelUtils.createAndPopulateExcelReport(cardTransactionMonthlySumList);
     }
 }

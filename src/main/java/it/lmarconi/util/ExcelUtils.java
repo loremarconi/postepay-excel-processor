@@ -1,19 +1,26 @@
 package it.lmarconi.util;
 
 import it.lmarconi.model.CardTransaction;
+import it.lmarconi.model.CardTransactionMonthlySum;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Slf4j
 public class ExcelUtils {
@@ -51,6 +58,42 @@ public class ExcelUtils {
         }
         log.info("Retrieved {} transactions from excel file", transactions.size());
         return transactions;
+    }
+
+    public static void createAndPopulateExcelReport(List<CardTransactionMonthlySum> monthlySums) {
+        log.info("Preparing to create excel report");
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet();
+
+        Map<String, Object[]> data = new TreeMap<>();
+        data.put(String.valueOf(1), new Object[]{"Month", "Net Income"});
+        int i = 2;
+        for (CardTransactionMonthlySum monthlySum : monthlySums) {
+            data.put(String.valueOf(i), new Object[]{monthlySum.getMonth(), monthlySum.getMonthlyNetIncome()});
+            i++;
+        }
+        int rowNum = 0;
+        for (String key : data.keySet()) {
+            Row row = sheet.createRow(rowNum++);
+            Object[] objects = data.get(key);
+            int cellNum = 0;
+            for (Object obj : objects) {
+                Cell cell = row.createCell(cellNum++);
+                switch (obj) {
+                    case String str -> cell.setCellValue(str);
+                    case BigDecimal bigDecimal -> cell.setCellValue(bigDecimal.doubleValue());
+                    default -> cell.setCellValue(String.valueOf(obj));
+                }
+            }
+        }
+
+        try (FileOutputStream file = new FileOutputStream("INSERT OUTPUT PATH HERE")) {
+            log.info("Attempting to create report excel file");
+            workbook.write(file);
+        } catch (IOException e) {
+            log.error("There was an error while trying to create report excel file");
+            throw new RuntimeException(e);
+        }
     }
 
     private static LocalDate fromStringToDate(String dateString) {
